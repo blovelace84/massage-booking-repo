@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth"; // Custom hook to get user info
 
 const BookingForm = () => {
   const { user } = useAuth();
