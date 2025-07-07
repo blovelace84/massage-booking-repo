@@ -1,50 +1,87 @@
-import { useEffect, useState } from 'react';
-import BookingForm from '../components/BookingForm';
-import { logoutUser } from '../utils/auth';
-import { db, auth } from '../firebase';
-import { addDoc, collection, doc, getDocs, query, where } from 'firebase/firestore';
+// src/pages/Dashboard.jsx
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BookingForm from "../components/BookingForm";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../firebase";
+import { useAuth } from "../hooks/useAuth";
+import { logoutUser } from "../utils/auth";
+import AppointmentCard from "../components/AppointmentCard";
 
 const Dashboard = () => {
-    const [appointments, setAppointments] = useState([]); // State to hold appointments
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [appointments, setAppointments] = useState([]);
 
-    // Fetch appointments from Firestore
-    const fetchAppointments = async () => {
-        const q = query(
-            collection(db, "appointments"),
-            where("userId", "==", auth.currentUser.uid)
-        );
-        const querySnapshopt = await getDocs(q);
-        setAppointments(querySnapshopt.docs.map(doc => doc.data()));
-    };
-    // Handle booking submission
-    const handleBooking = async (booking) => {
-        await addDoc(collection(db, "appointments"), {
-            ...booking,
-            userId: auth.currentUser.uid,
-        });
-        fetchAppointments();
-    };
-    // Handle user logout
-    const handleLogout = async () => {
-        await logoutUser();
-        Navigate('/login'); // Redirect to login page after logout
+  // 🔁 Fetch user's appointments
+  const fetchAppointments = async () => {
+    if (!user) return;
+
+    try {
+      const appointmentsRef = collection(db, "appointments");
+      const q = query(appointmentsRef, where("userId", "==", user.uid));
+      const snapshot = await getDocs(q);
+
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setAppointments(data);
+    } catch (error) {
+      console.error("Error fetching appointments:", error.message);
     }
-    // Fetch appointments when component mounts
-    useEffect(() => {
-        fetchAppointments();
-    }, []);
+  };
 
-    return(
-        <div className='dashboard-page'>
-            <h2>Dashboard</h2>
-            <button onClick={handleLogout}>Log Out</button>
-            <BookingForm onSubmit={handleBooking} />
-            <h3>Your Appointments</h3>
-            {appointments.map((appt, idx) => (
-                <ApppointmentCard key={idx} appointment={appt} />
-            ))}
-        </div>
-    );
+  const handleBookingAppointment = async (formData) => {
+  if (!user) return;
+
+  try {
+    await addDoc(collection(db, "appointments"), {
+      ...formData,
+      userId: user.uid,
+      createdAt: serverTimestamp(),
+    });
+
+    await fetchAppointments();
+  } catch (error) {
+    console.error("Booking failed:", error.message);
+  }
+};
+
+  // ⏳ Wait until loading completes and user is available
+  useEffect(() => {
+    if (!loading && user) {
+      fetchAppointments();
+    }
+  }, [loading, user]);
+
+  // 🚪 Handle logout
+  const handleLogout = async () => {
+    await logoutUser();
+    navigate("/login");
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (!user) return <p>You must be logged in to view this page.</p>;
+
+  return (
+    <div className="dashboard">
+      <h2>Welcome, {user.email}</h2>
+      <BookingForm onSubmit={handleBookingAppointment} />
+
+      <button onClick={handleLogout}>Log Out</button>
+
+      <h3>Your Appointments</h3>
+      {appointments.length > 0 ? (
+        appointments.map((appt) => (
+          <AppointmentCard key={appt.id} appointment={appt} />
+        ))
+      ) : (
+        <p>No appointments found.</p>
+      )}
+    </div>
+  );
 };
 
 export default Dashboard;
