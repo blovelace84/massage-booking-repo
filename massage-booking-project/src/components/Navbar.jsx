@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
 
-export default function Home() {
+export default function Navbar() {
   return (
-    <div className="p-4 text-center">
-      <h1 className="text-2xl font-bold">Welcome to the Massage Booking App</h1>
-      <div className="mt-4 space-x-4">
-        <Link to="/login" className="text-blue-600 underline">Login</Link>
-        <Link to="/register" className="text-blue-600 underline">Register</Link>
+    <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
+      <Link to="/" className="text-xl font-bold text-blue-600">
+        Massage App
+      </Link>
+      <div className="space-x-4">
+        <Link to="/login" className="text-gray-700 hover:text-blue-600">Login</Link>
+        <Link to="/register" className="text-gray-700 hover:text-blue-600">Register</Link>
+        <Link to="/dashboard" className="text-gray-700 hover:text-blue-600">Dashboard</Link>
       </div>
-    </div>
+    </nav>
   );
 }
