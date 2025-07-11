@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 const BookingForm = () => {
@@ -11,6 +11,18 @@ const BookingForm = () => {
   const [time, setTime] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [therapists, setTherapists] = useState([]);
+  const [selectTherapist, setSelectedTherapist] = useState('');
+
+  useEffect(() => {
+    const fetchTherapists = async () => {
+      const snapshot = await getDocs(collection(db, 'therapists'));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTherapists(data);
+    };
+
+    fetchTherapists();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +34,7 @@ const BookingForm = () => {
       await addDoc(collection(db, 'bookings'), {
         userId: user.uid,
         massageType,
+        therapist: selectTherapist,
         date: Timestamp.fromDate(appointmentDate),
         createdAt: Timestamp.now(),
         status: 'pending',
@@ -59,6 +72,20 @@ const BookingForm = () => {
             <option value="Hot Stone">Hot Stone</option>
             <option value="Thai">Thai</option>
           </select>
+        </div>
+        
+        <div>
+          <label className='block text-gray-700 mb-1'>Preffered Therapist</label>
+          <select 
+            value={selectTherapist}
+            onChange={(e) => setSelectedTherapist(e.target.value)}
+            className='w-full border border-gray-300 rounded px-3 py-2'
+            >
+              <option value="">No Preference</option>
+              {therapists.map(t => (
+                <option key={t.id} value={t.name}>{t.name}</option>
+              ))}
+            </select>
         </div>
 
         <div>

@@ -6,6 +6,8 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import TherapistList from './components/TherapistList';
+import TherapistAdmin from './pages/TherapistAdmin';
 
 const App = () => {
   return (
@@ -25,6 +27,8 @@ const App = () => {
           } />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/therapists' element={<TherapistList />} />
+        <Route path='/admin/therapists' element={<ProtectedRoute requiredRole='admin'><TherapistAdmin /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
