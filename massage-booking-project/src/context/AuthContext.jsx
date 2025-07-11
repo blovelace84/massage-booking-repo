@@ -1,16 +1,27 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if(currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
+        getDoc(userRef).then((snap) => {
+          if(snap.exists()) {
+            setRole(snap.data().role || 'user');
+          }
+        })
+      }
       setUser(currentUser);
       setLoading(false);
     });
@@ -25,7 +36,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
+    <AuthContext.Provider value={{ user, role, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );

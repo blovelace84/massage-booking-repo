@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebase';
+import { setDoc, doc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -21,6 +23,10 @@ const Register = () => {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        role:'user',
+      });
+      
       navigate('/dashboard');
     } catch (err) {
       setError('Failed to create account.');
