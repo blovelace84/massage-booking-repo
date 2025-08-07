@@ -43,9 +43,13 @@ function BookingForm() {
 
     try {
       await addDoc(collection(db, "bookings"), {
-        ...formData,
+        name: formData.name,
+        contact: formData.contact,
+        massageType: formData.massageType,
+        date: formData.date,
+        notes: formData.notes,
         timestamp: Timestamp.now(),
-        userId: user.uid
+        userId: user.uid, //This is optional but I may not need it
       });
       alert("Booking submitted successfully!");
       setFormData({
