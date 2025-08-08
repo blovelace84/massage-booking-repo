@@ -21,10 +21,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-let analytics;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
-}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+//Initialize services
+const db = getFirestore(app);
+const auth = getAuth(app);
+const analytics = getAnalytics(app);
+
+//Export services
+export { db, auth, analytics };

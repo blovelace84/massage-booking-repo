@@ -11,13 +11,17 @@ function BookingList() {
     onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        const q = query(collection(db, "bookings"), where("contact", "==", currentUser.email));
+        const q = query(
+          collection(db, "appointments"),
+          where("userId", "==", auth.currentUser.uid)
+        );
         const snapshot = await getDocs(q);
         const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setBookings(items);
       }
     });
   }, []);
+
 
   const cancelBooking = async (id) => {
     await deleteDoc(doc(db, "bookings", id));

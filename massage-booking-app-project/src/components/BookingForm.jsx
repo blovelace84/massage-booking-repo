@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../firebase/config";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "../firebase/config";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
-function BookingForm() {
+const BookingForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     contact: "",
@@ -42,7 +44,7 @@ function BookingForm() {
     }
 
     try {
-      await addDoc(collection(db, "bookings"), {
+      await addDoc(collection(db, "appointments"), {
         name: formData.name,
         contact: formData.contact,
         massageType: formData.massageType,
@@ -51,6 +53,12 @@ function BookingForm() {
         timestamp: Timestamp.now(),
         userId: user.uid, //This is optional but I may not need it
       });
+
+      logEvent(analytics, 'booking_submitted', {
+        massage_type: formData.massageType,
+        booking_date: formData.date,
+        booking_time: formData.time,
+      })
       alert("Booking submitted successfully!");
       setFormData({
         name: "",
