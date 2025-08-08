@@ -1,48 +1,61 @@
 import React, { useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
-import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-function BookingList() {
+const BookingList = () => {
   const [bookings, setBookings] = useState([]);
-  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        const q = query(
-          collection(db, "appointments"),
-          where("userId", "==", auth.currentUser.uid)
-        );
-        const snapshot = await getDocs(q);
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setBookings(items);
+    // Listen for auth changes
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Only get bookings belonging to this user
+          const q = query(
+            collection(db, "bookings"),
+            where("userId", "==", user.uid)
+          );
+
+          const querySnapshot = await getDocs(q);
+          const bookingsData = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setBookings(bookingsData);
+        } catch (error) {
+          console.error("Error fetching bookings:", error);
+        }
+      } else {
+        // If no user is logged in
+        setBookings([]);
       }
+      setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
-
-  const cancelBooking = async (id) => {
-    await deleteDoc(doc(db, "bookings", id));
-    setBookings(bookings.filter(b => b.id !== id));
-  };
-
-  if (!user) return <p className="container mt-4">Please log in to view your bookings.</p>;
+  if (loading) return <p>Loading bookings...</p>;
 
   return (
-    <div className="container mt-4">
-      <h3>Your Bookings</h3>
-      <ul className="list-group">
-        {bookings.map((b) => (
-          <li key={b.id} className="list-group-item d-flex justify-content-between align-items-center">
-            {b.massageType} on {new Date(b.date).toLocaleString()}
-            <button className="btn btn-danger btn-sm" onClick={() => cancelBooking(b.id)}>Cancel</button>
-          </li>
-        ))}
-      </ul>
+    <div>
+      <h2>Your Bookings</h2>
+      {bookings.length === 0 ? (
+        <p>No bookings found.</p>
+      ) : (
+        <ul>
+          {bookings.map((booking) => (
+            <li key={booking.id}>
+              <strong>{booking.date}</strong> at {booking.time} — {booking.name}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
+};
 
 export default BookingList;

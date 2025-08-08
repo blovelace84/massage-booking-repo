@@ -1,137 +1,96 @@
-import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebase/config";
+import React, { useState } from "react";
+import { db } from "../firebase/config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../firebase/config";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const BookingForm = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    contact: "",
-    massageType: "Swedish",
-    date: "",
-    notes: ""
-  });
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
 
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
-
-  // Check auth state
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        setFormData((prev) => ({ ...prev, contact: user.email }));
-      } else {
-        setUser(null);
-      }
-    });
-    return () => unsub();
-  }, []);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const submitBooking = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!user) {
-      alert("You must be logged in to book an appointment.");
-      navigate("/login");
+      console.error("No user logged in");
       return;
     }
 
     try {
-      await addDoc(collection(db, "appointments"), {
-        name: formData.name,
-        contact: formData.contact,
-        massageType: formData.massageType,
-        date: formData.date,
-        notes: formData.notes,
-        timestamp: Timestamp.now(),
-        userId: user.uid, //This is optional but I may not need it
+      await addDoc(collection(db, "bookings"), {
+        name,
+        email,
+        date,
+        time,
+        createdAt: serverTimestamp(),
+        userId: user.uid,
       });
 
-      logEvent(analytics, 'booking_submitted', {
-        massage_type: formData.massageType,
-        booking_date: formData.date,
-        booking_time: formData.time,
-      })
-      alert("Booking submitted successfully!");
-      setFormData({
-        name: "",
-        contact: user.email,
-        massageType: "Swedish",
-        date: "",
-        notes: ""
+      // Log booking event
+      logEvent(analytics, "appointment_booked", {
+        user_email: user.email,
+        booking_date: date,
+        booking_time: time,
       });
+
+      setName("");
+      setEmail("");
+      setDate("");
+      setTime("");
     } catch (error) {
       console.error("Error booking:", error);
-      alert("Failed to submit booking.");
     }
   };
 
   return (
-    <form className="container mt-5" onSubmit={submitBooking}>
-      <h2>Book a Massage</h2>
-      <div className="mb-3">
-        <label className="form-label">Full Name</label>
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label>Name:</label>
         <input
           type="text"
-          name="name"
-          className="form-control"
-          value={formData.name}
-          onChange={handleChange}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
+          autoComplete="name"  // ✅ Added
         />
       </div>
-
-      <div className="mb-3">
-        <label className="form-label">Massage Type</label>
-        <select
-          name="massageType"
-          className="form-select"
-          value={formData.massageType}
-          onChange={handleChange}
-        >
-          <option>Swedish</option>
-          <option>Deep Tissue</option>
-          <option>Hot Stone</option>
-          <option>Sports</option>
-          <option>Aromatherapy</option>
-        </select>
-      </div>
-
-      <div className="mb-3">
-        <label className="form-label">Preferred Date & Time</label>
+      <div>
+        <label>Email:</label>
         <input
-          type="datetime-local"
-          name="date"
-          className="form-control"
-          value={formData.date}
-          onChange={handleChange}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
+          autoComplete="email" // ✅ Added
         />
       </div>
-
-      <div className="mb-3">
-        <label className="form-label">Notes (optional)</label>
-        <textarea
-          name="notes"
-          className="form-control"
-          rows="3"
-          value={formData.notes}
-          onChange={handleChange}
+      <div>
+        <label>Date:</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+          autoComplete="off" // ✅ Added to prevent browser date suggestions
         />
       </div>
-
-      <button className="btn btn-primary" type="submit">
-        Submit Booking
-      </button>
+      <div>
+        <label>Time:</label>
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          required
+          autoComplete="off" // ✅ Added
+        />
+      </div>
+      <button type="submit">Book Appointment</button>
     </form>
   );
-}
+};
 
 export default BookingForm;
