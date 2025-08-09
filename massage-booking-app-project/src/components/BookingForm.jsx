@@ -1,95 +1,117 @@
 import React, { useState } from "react";
 import { db } from "../firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { logEvent } from "firebase/analytics";
-import { analytics } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 
 const BookingForm = () => {
   const { user } = useAuth();
+
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [service, setService] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!user) {
-      console.error("No user logged in");
+      setError("You must be logged in to book an appointment.");
       return;
     }
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
     try {
       await addDoc(collection(db, "bookings"), {
         name,
-        email,
+        service,
         date,
         time,
+        userId: user.uid, // important for rules
         createdAt: serverTimestamp(),
-        userId: user.uid,
       });
 
-      // Log booking event
-      logEvent(analytics, "appointment_booked", {
-        user_email: user.email,
-        booking_date: date,
-        booking_time: time,
-      });
-
+      setSuccess("Your appointment has been booked successfully!");
       setName("");
-      setEmail("");
+      setService("");
       setDate("");
       setTime("");
-    } catch (error) {
-      console.error("Error booking:", error);
+    } catch (err) {
+      console.error("Error booking:", err);
+      setError("Failed to book appointment. Please try again.");
     }
+
+    setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Name:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          autoComplete="name"  // ✅ Added
-        />
-      </div>
-      <div>
-        <label>Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="email" // ✅ Added
-        />
-      </div>
-      <div>
-        <label>Date:</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-          autoComplete="off" // ✅ Added to prevent browser date suggestions
-        />
-      </div>
-      <div>
-        <label>Time:</label>
-        <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          required
-          autoComplete="off" // ✅ Added
-        />
-      </div>
-      <button type="submit">Book Appointment</button>
-    </form>
+    <div className="container mt-4">
+      <h2>Book an Appointment</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
+
+      <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
+        <div className="mb-3">
+          <label className="form-label">Full Name</label>
+          <input
+            type="text"
+            className="form-control"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoComplete="name"
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Service</label>
+          <select
+            className="form-select"
+            value={service}
+            onChange={(e) => setService(e.target.value)}
+            required
+          >
+            <option value="">Select a service</option>
+            <option value="Swedish Massage">Swedish Massage</option>
+            <option value="Deep Tissue Massage">Deep Tissue Massage</option>
+            <option value="Hot Stone Massage">Hot Stone Massage</option>
+            <option value="Aromatherapy Massage">Aromatherapy Massage</option>
+          </select>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Date</label>
+          <input
+            type="date"
+            className="form-control"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+            autoComplete="off"
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Time</label>
+          <input
+            type="time"
+            className="form-control"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            required
+            autoComplete="off"
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? "Booking..." : "Book Appointment"}
+        </button>
+      </form>
+    </div>
   );
 };
 
