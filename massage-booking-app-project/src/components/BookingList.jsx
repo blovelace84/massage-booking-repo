@@ -48,60 +48,70 @@ const BookingList = () => {
   if (loading) return <p>Loading bookings...</p>;
 
   return (
-    <div className="mt-4">
-      <h2>Your Bookings</h2>
-      {bookings.length === 0 ? (
-        <p>No bookings found.</p>
+     <div className="container mt-4">
+      {user ? (
+        <>
+          <h1>Welcome, {user.email}</h1>
+          <h2>Your Bookings</h2>
+          {bookings.length === 0 ? (
+            <p>No bookings found.</p>
+          ) : (
+            <ul className="list-group">
+              {bookings.map((booking) => (
+                <li
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                  key={booking.id}
+                >
+                  {editingId === booking.id ? (
+                    <div className="d-flex gap-2">
+                      <input
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        className="form-control"
+                      />
+                      <input
+                        type="time"
+                        value={editTime}
+                        onChange={(e) => setEditTime(e.target.value)}
+                        className="form-control"
+                      />
+                      <button className="btn btn-success btn-sm" onClick={() => handleEditSave(booking.id)}>
+                        Save
+                      </button>
+                      <button className="btn btn-secondary btn-sm" onClick={() => setEditingId(null)}>
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span>
+                        <strong>{booking.date}</strong> at {booking.time} — {booking.name}
+                      </span>
+                      <div>
+                        <button
+                          className="btn btn-warning btn-sm me-2"
+                          onClick={() => {
+                            setEditingId(booking.id);
+                            setEditDate(booking.date);
+                            setEditTime(booking.time);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleCancel(booking.id)}>
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       ) : (
-        <ul className="list-group">
-          {bookings.map((booking) => (
-            <li className="list-group-item d-flex justify-content-between align-items-center" key={booking.id}>
-              {editingId === booking.id ? (
-                <div className="d-flex gap-2">
-                  <input
-                    type="date"
-                    value={editDate}
-                    onChange={(e) => setEditDate(e.target.value)}
-                    className="form-control"
-                  />
-                  <input
-                    type="time"
-                    value={editTime}
-                    onChange={(e) => setEditTime(e.target.value)}
-                    className="form-control"
-                  />
-                  <button className="btn btn-success btn-sm" onClick={() => handleEditSave(booking.id)}>
-                    Save
-                  </button>
-                  <button className="btn btn-secondary btn-sm" onClick={() => setEditingId(null)}>
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <span>
-                    <strong>{booking.date}</strong> at {booking.time} — {booking.name}
-                  </span>
-                  <div>
-                    <button
-                      className="btn btn-warning btn-sm me-2"
-                      onClick={() => {
-                        setEditingId(booking.id);
-                        setEditDate(booking.date);
-                        setEditTime(booking.time);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleCancel(booking.id)}>
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+        <p>Please log in to view your bookings.</p>
       )}
     </div>
   );

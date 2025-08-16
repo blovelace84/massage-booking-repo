@@ -16,7 +16,6 @@ function App() {
         <Route path="/my-bookings" element={<BookingList />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
