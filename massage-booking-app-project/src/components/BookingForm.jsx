@@ -4,7 +4,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
 const BookingForm = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // ✅ get logged-in user from context
 
   const [name, setName] = useState("");
   const [service, setService] = useState("");
@@ -16,6 +16,7 @@ const BookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!user) {
       setError("You must be logged in to book an appointment.");
       return;
@@ -31,7 +32,7 @@ const BookingForm = () => {
         service,
         date,
         time,
-        userId: user.uid, // important for rules
+        userId: user.uid, // ✅ link booking to the logged-in user
         createdAt: serverTimestamp(),
       });
 
