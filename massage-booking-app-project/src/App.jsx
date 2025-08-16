@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
 import BookingForm from "./components/BookingForm";
 import BookingList from "./components/BookingList";
 import Register from "./pages/Register";
