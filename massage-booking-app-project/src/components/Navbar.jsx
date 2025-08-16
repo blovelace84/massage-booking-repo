@@ -1,43 +1,65 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Nav } from "react-bootstrap";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { auth } from "../firebase/config";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
-function Navbar() {
-  const [user, setUser] = useState(null);
+const Navbar = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const logout = async () => {
+  const handleLogout = async () => {
     await signOut(auth);
     navigate("/login");
-  };
-
-  return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-      <Link className="navbar-brand" to="/">MassageApp</Link>
-      <div className="navbar-nav">
-        {user ? (
-          <>
-            <Link className="nav-link" to="/">Book</Link>
-            <Link className="nav-link" to="/my-bookings">My Bookings</Link>
-            <button className="btn btn-outline-light ms-2" onClick={logout}>Logout</button>
-          </>
-        ) : (
-          <>
-            <Link className="nav-link" to="/login">Login</Link>
-            <Link className="nav-link" to="/register">Register</Link>
-          </>
-        )}
-      </div>
-    </nav>
-  );
+  }
+  <Nav variant="pills" className="justify-content-center mt-3">
+    <Nav.Item>
+      <NavLink
+        as={NavLink}
+        to="/"
+        eventKey="/"
+        end
+      >
+        Book
+      </NavLink>
+    </Nav.Item>
+    <Nav.Item>
+      <NavLink
+        as={NavLink}
+        to="/my-bookings"
+        eventKey="/my-bookings"
+      >
+        My Bookings
+      </NavLink>
+    </Nav.Item>
+    <Nav.Item>
+      <NavLink
+        as={NavLink}
+        to="/login"
+        eventKey="/login"
+      >
+        Login
+      </NavLink>
+    </Nav.Item>
+    <Nav.Item>
+      <NavLink
+        as={NavLink}
+        to="/register"
+        eventKey="/register"
+      >
+        Register
+      </NavLink>
+    </Nav.Item>
+    <Nav.Item>
+      <button
+        className="btn btn-outline-danger ms-2"
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
+    </Nav.Item>
+  </Nav>
 }
 
 export default Navbar;
