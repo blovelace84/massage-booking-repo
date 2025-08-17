@@ -17,7 +17,7 @@ const Navbar = () => {
 
   return (
     <div className="container mt-3">
-      <Nav variant="pills" className="justify-content-center">
+      <Nav variant="pills" className="justify-content-center bg-dark p-2 rounded">
         <Nav.Item>
           <Nav.Link as={NavLink} to="/" end>
             Book
