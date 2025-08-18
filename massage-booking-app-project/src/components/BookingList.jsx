@@ -87,6 +87,8 @@ const BookingList = () => {
                     <>
                       <span>
                         <strong>{booking.date}</strong> at {booking.time} — {booking.name}
+                        <br />
+                        <em>{booking.service} ({booking.duration} min)</em>
                       </span>
                       <div>
                         <button

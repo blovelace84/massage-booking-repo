@@ -23,7 +23,11 @@ const Navbar = () => {
             Book
           </Nav.Link>
         </Nav.Item>
-
+        <Nav.Item>
+          <Nav.Link as={NavLink} to="/therapists">
+            Therapists
+          </Nav.Link>
+        </Nav.Item>
         {user && (
           <Nav.Item>
             <Nav.Link as={NavLink} to="/my-bookings">

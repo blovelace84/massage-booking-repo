@@ -6,6 +6,7 @@ import BookingForm from "./components/BookingForm";
 import BookingList from "./components/BookingList";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import TherapistList from "./components/TherapistList";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Navbar />  {/* ✅ Show navbar everywhere */}
         <Routes>
           <Route path="/" element={<BookingForm />} />
+          <Route path="/therapists" element={<TherapistList />} />
           <Route path="/my-bookings" element={<BookingList />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
