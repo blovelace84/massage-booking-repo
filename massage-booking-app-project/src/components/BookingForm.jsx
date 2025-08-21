@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { db } from "../firebase/config";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { therapists } from "../data/therapists";
 
@@ -12,10 +12,16 @@ const BookingForm = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("60"); // default duration 60 minutes
-  const [therapist, setTherapist] = useState(therapists[0].id);
-  // const [loading, setLoading] = useState(false);
-  // const [success, setSuccess] = useState("");
-  // const [error, setError] = useState("");
+  const [therapist, setTherapist] = useState([]);
+
+  useEffect(() => {
+    const fetchTherapists = async () => {
+      const snapshot = await getDocs(collection(db, "therapists"));
+      setTherapist(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchTherapists();
+  }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,10 +30,6 @@ const BookingForm = () => {
       setError("You must be logged in to book an appointment.");
       return;
     }
-
-    // setLoading(true);
-    // setError("");
-    // setSuccess("");
 
     try {
       await addDoc(collection(db, "bookings"), {
@@ -50,11 +52,9 @@ const BookingForm = () => {
       setTherapist(therapists[0].id);
       alert("Booking successful!"); // simple success message
     } catch (err) {
-      console.error("Error booking:", err);
-      // setError("Failed to book appointment. Please try again.");
+      console.error("Error booking:", err);      
     }
 
-    // setLoading(false);
   };
 
   return (
