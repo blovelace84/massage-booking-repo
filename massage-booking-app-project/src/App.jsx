@@ -15,8 +15,8 @@ function App() {
         <Navbar />  {/* ✅ Show navbar everywhere */}
         <Routes>
           <Route path="/" element={<BookingForm />} />
-          <Route path="/therapists" element={<TherapistList />} />
           <Route path="/my-bookings" element={<BookingList />} />
+          <Route path="/therapists" element={<TherapistList />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
