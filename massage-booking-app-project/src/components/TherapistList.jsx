@@ -1,4 +1,6 @@
 import React, { useEffect, useState} from "react";
+import { getDocs, collection } from "firebase/firestore";
+import { db } from "../firebase/config"; // Ensure you have the correct path to your firebase config
 import { therapists } from "../data/therapists";
 import './TherapistList.css'; 
 
@@ -8,7 +10,7 @@ const TherapistList = () => {
     useEffect(() => {
         const fetchTherapists = async () => {
             try {
-                const querySnapshot = await getDocs(collection,(db, "therapists"));
+                const querySnapshot = await getDocs(collection(db, "therapists"));
                 const data = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
