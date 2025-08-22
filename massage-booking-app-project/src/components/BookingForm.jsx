@@ -12,7 +12,7 @@ const BookingForm = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("60"); // default duration 60 minutes
-  const [therapist, setTherapist] = useState([]);
+  const [therapist, setTherapist] = useState("");
 
   useEffect(() => {
     const fetchTherapists = async () => {
@@ -132,6 +132,7 @@ const BookingForm = () => {
             value={therapist}
             onChange={(e) => setTherapist(e.target.value)}
           >
+            <option value="">Select a therapist</option>
             {therapists.map((t) => (
               <option value="t.id" key={t.id}>
                 {t.name} - {t.specialty}
