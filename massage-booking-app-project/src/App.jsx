@@ -1,5 +1,5 @@
 // src/App.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import BookingForm from "./components/BookingForm";
@@ -7,8 +7,13 @@ import BookingList from "./components/BookingList";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import TherapistList from "./components/TherapistList";
+import { seedTherapists } from "./firebase/seedTherapists";
 
 function App() {
+  useEffect(() => {
+    seedTherapists();
+  }, []);
+
   return (
     <Router>
       <div>

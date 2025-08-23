@@ -33,13 +33,8 @@ const BookingForm = () => {
   }, []);
 
   // ✅ safely filter therapists based on selected service
-  const filteredTherapists = service
-    ? therapists.filter((t) => {
-        const specialty = t.specialty || "";
-        return specialty.toLowerCase().includes(service.toLowerCase());
-      })
-    : therapists;
-
+  const filteredTherapists = therapists;
+    
   // ✅ handle booking submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,11 +113,13 @@ const BookingForm = () => {
           >
             <option value="">-- Select a Therapist --</option>
             {filteredTherapists.length > 0 ? (
-              filteredTherapists.map((t) => (
-                <option key={t.id} value={t.name}>
-                  {t.name} — {t.specialty || "General"}
-                </option>
-              ))
+              filteredTherapists
+                .filter((t) => t.specialty)
+                .map((t) => (
+                  <option value={t.name} key={t.id}>
+                    {t.name} - {t.specialty}
+                  </option>
+                ))
             ) : (
               <option value="">No therapist available for this service</option>
             )}
