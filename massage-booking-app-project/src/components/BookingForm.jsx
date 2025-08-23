@@ -71,6 +71,16 @@ const BookingForm = () => {
     <div className="container mt-4">
       <h2>Book a Massage</h2>
       <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
+        <div className="mb-4">
+          <label htmlFor="name" className="form-label">Name</label>
+          <input
+            type="text"
+            id="name"
+            className="form-control"
+            value={user ? user.displayName : ""}
+            enabled
+          />
+        </div>
         {/* Service Selection */}
         <div className="mb-3">
           <label className="form-label">Service</label>
