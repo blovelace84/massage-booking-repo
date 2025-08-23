@@ -5,13 +5,15 @@ import { useAuth } from "../context/AuthContext";
 
 const BookingForm = () => {
   const { user } = useAuth();
+
+  // ✅ initialize everything as "" so nothing is ever null
   const [service, setService] = useState("");
   const [therapist, setTherapist] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [therapists, setTherapists] = useState([]);
 
-  // ✅ Fetch therapists from Firestore
+  // ✅ fetch therapists from Firestore
   useEffect(() => {
     const fetchTherapists = async () => {
       try {
@@ -20,7 +22,6 @@ const BookingForm = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log("Fetched therapists:", data); // Debug log
         setTherapists(data);
       } catch (error) {
         console.error("Error fetching therapists:", error);
@@ -30,15 +31,15 @@ const BookingForm = () => {
     fetchTherapists();
   }, []);
 
-  // ✅ Filter therapists based on selected service
+  // ✅ safely filter therapists based on selected service
   const filteredTherapists = service
-    ? therapists.filter((t) =>{
-      const specialty = t.specialty || ""; //fallback to empty string if specialty is undefined
-      return specialty.toLowerCase().includes(service.toLowerCase());
-    })
+    ? therapists.filter((t) => {
+        const specialty = t.specialty || "";
+        return specialty.toLowerCase().includes(service.toLowerCase());
+      })
     : therapists;
 
-  // ✅ Handle booking submission
+  // ✅ handle booking submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -58,6 +59,8 @@ const BookingForm = () => {
       });
 
       alert("Appointment booked successfully!");
+
+      // ✅ reset form (empty strings, not null)
       setService("");
       setTherapist("");
       setDate("");
@@ -71,22 +74,13 @@ const BookingForm = () => {
     <div className="container mt-4">
       <h2>Book a Massage</h2>
       <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
-        <div className="mb-4">
-          <label htmlFor="name" className="form-label">Name</label>
-          <input
-            type="text"
-            id="name"
-            className="form-control"
-            value={user ? user.displayName : ""}
-            enabled
-          />
-        </div>
+
         {/* Service Selection */}
         <div className="mb-3">
           <label className="form-label">Service</label>
           <select
             className="form-select"
-            value={service}
+            value={service || ""}   // ✅ never null
             onChange={(e) => setService(e.target.value)}
             required
           >
@@ -99,12 +93,12 @@ const BookingForm = () => {
           </select>
         </div>
 
-        {/* Therapist Selection (filtered) */}
+        {/* Therapist Selection */}
         <div className="mb-3">
           <label className="form-label">Therapist</label>
           <select
             className="form-select"
-            value={therapist}
+            value={therapist || ""}   // ✅ never null
             onChange={(e) => setTherapist(e.target.value)}
             required
           >
@@ -112,7 +106,7 @@ const BookingForm = () => {
             {filteredTherapists.length > 0 ? (
               filteredTherapists.map((t) => (
                 <option key={t.id} value={t.name}>
-                  {t.name} — {t.specialty}
+                  {t.name} — {t.specialty || "General"}
                 </option>
               ))
             ) : (
@@ -127,7 +121,7 @@ const BookingForm = () => {
           <input
             type="date"
             className="form-control"
-            value={date}
+            value={date || ""}   // ✅ never null
             onChange={(e) => setDate(e.target.value)}
             required
           />
@@ -139,7 +133,7 @@ const BookingForm = () => {
           <input
             type="time"
             className="form-control"
-            value={time}
+            value={time || ""}   // ✅ never null
             onChange={(e) => setTime(e.target.value)}
             required
           />
