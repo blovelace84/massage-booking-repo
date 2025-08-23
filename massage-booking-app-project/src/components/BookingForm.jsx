@@ -7,6 +7,7 @@ const BookingForm = () => {
   const { user } = useAuth();
 
   // ✅ initialize everything as "" so nothing is ever null
+  const [name, setName] = useState("");
   const [service, setService] = useState("");
   const [therapist, setTherapist] = useState("");
   const [date, setDate] = useState("");
@@ -51,6 +52,7 @@ const BookingForm = () => {
     try {
       await addDoc(collection(db, "bookings"), {
         userId: user.uid,
+        name,
         service,
         therapist,
         date,
@@ -61,6 +63,7 @@ const BookingForm = () => {
       alert("Appointment booked successfully!");
 
       // ✅ reset form (empty strings, not null)
+      setName("");
       setService("");
       setTherapist("");
       setDate("");
@@ -74,7 +77,18 @@ const BookingForm = () => {
     <div className="container mt-4">
       <h2>Book a Massage</h2>
       <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
-
+        {/* Name Input */}
+        <div className="mb-3">
+          <label htmlFor="name" className="form-label">Your Name</label>
+          <input 
+            type="text"
+            className="form-control"
+            value={name || ""}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+            required
+          />
+        </div>
         {/* Service Selection */}
         <div className="mb-3">
           <label className="form-label">Service</label>
