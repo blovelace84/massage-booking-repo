@@ -12,20 +12,12 @@ import BookingList from "./components/BookingList";
 import TherapistList from "./components/TherapistList";
 import Login from "./pages/Login";
 
-// Seeder (only run once when updating therapist data)
-import { seedTherapists } from "./firebase/seedTherapists";
-
 function PrivateRoute({ children }) {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" />;
 }
 
 function App() {
-  useEffect(() => {
-    // ⚠️ Run this only once when you need to refresh therapist data in Firestore
-    // Uncomment to seed, then comment it back out after running
-    seedTherapists();
-  }, []);
 
   return (
     <AuthProvider>
