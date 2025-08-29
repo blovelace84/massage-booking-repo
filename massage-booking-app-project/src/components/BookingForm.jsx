@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "../firebase/config";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
+import { format } from "date-fns";
 
 const BookingForm = () => {
   const { user } = useAuth();
@@ -34,6 +35,16 @@ const BookingForm = () => {
 
   // ✅ safely filter therapists based on selected service
   const filteredTherapists = therapists;
+
+  //availability added here I guess
+  const selectedTherapist = therapists.find((t) =>t.name === therapist);
+
+  const availableTimes = 
+    selectedTherapist && date
+      ? selectedTherapist.availability[
+          format(new Date(date), "EEEE")
+      ] || []
+      : [];
     
   // ✅ handle booking submission
   const handleSubmit = async (e) => {
@@ -141,18 +152,28 @@ const BookingForm = () => {
         {/* Time Selection */}
         <div className="mb-3">
           <label className="form-label">Time</label>
-          <input
-            type="time"
-            className="form-control"
-            value={time || ""}   // ✅ never null
-            onChange={(e) => setTime(e.target.value)}
-            required
-          />
-        </div>
+         <select name="time" id="time"
+          className="form-select"
+          value={time || ""}
+          onChange={(e) => setTime(e.target.value)}
+          required
+          >
+            <option value="">-- Select a Time --</option>
+            {availableTimes.length > 0 ? (
+              availableTimes.map((slot, idx) => (
+                <option value={slot} key={idx}>
+                  {slot}
+                </option>
+              ))
+            ) : (
+              <option value="">No slots available</option>
+            )}
+          </select>
 
         <button type="submit" className="btn btn-primary">
           Book Appointment
         </button>
+        </div>
       </form>
     </div>
   );
